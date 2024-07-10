@@ -7,6 +7,7 @@ import { store, persistor } from './store';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import UserProfile from './components/User/UserProfile';
+import StoredDataDisplay from "./components/StoredDataDisplay";
 
 const App = () => (
   <Provider store={store}>
@@ -20,6 +21,7 @@ const App = () => (
         </Routes>
       </Router>
     </PersistGate>
+    <StoredDataDisplay />
   </Provider>
 );
 

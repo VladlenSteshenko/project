@@ -4,26 +4,27 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../api/api';
 import { setAuth } from '../../reducers/authSlice';
+import {jwtDecode} from "jwt-decode";
 
 const Login = () => {
-  const [login, setLogin] = useState('');
-  const [password, setPassword] = useState('');
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
   const [loginMutation] = useLoginMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
+    try { console.log(2222222222222222222,login,password)
       const { data } = await loginMutation({ login, password });
       if (data.login) {
-        dispatch(setAuth({ token: data.login }));
-        localStorage.setItem('token', data.login);
-        console.log()
-        navigate('/profile');
+        const decodedToken = jwtDecode(data.login);
+        dispatch(setAuth({ token: data.login, user: decodedToken }));
+        console.log(111111111111111,data.login)
+        navigate("/profile");
       }
     } catch (error) {
-      console.error('Login error', error);
+      console.error("Login error", error);
     }
   };
 
@@ -51,3 +52,6 @@ const Login = () => {
 };
 
 export default Login;
+
+  
+

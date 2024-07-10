@@ -2,18 +2,26 @@
 // src/api/api.js
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
-
-export const api = createApi({
-  baseQuery: graphqlRequestBaseQuery({
-    url: "http://chat.ed.asmer.org.ua/graphql",
-    prepareHeaders(headers, { getState }) {
-      const { token } = getState().auth;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
+// Create a wrapper around graphqlRequestBaseQuery that logs the query
+const logQueryBaseQuery = (baseQuery) => async (args, api, extraOptions) => {
+    // Log the query
+    console.log("Query:", args.document);
+  
+    // Send the query to the API
+    return await baseQuery(args, api, extraOptions);
+  };
+  export const api = createApi({
+    baseQuery: logQueryBaseQuery(graphqlRequestBaseQuery({
+      url: "http://chat.ed.asmer.org.ua/graphql",  // Make sure to replace this with your actual API URL
+      prepareHeaders(headers, { getState }) {
+        const { token } = getState().auth;
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
+  
       return headers;
     },
-  }),
+  })),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: ({ login, password }) => ({
@@ -55,24 +63,14 @@ export const api = createApi({
       }),
     }),
     userFindOne: builder.query({
-      query: ({ query }) => ({
-       
-          document: `
-              query oneUser {
-                UserFindOne(query: "[{\"_id\": \"66881c5cadf3bd0ee7be9879\" }]") {
-                    _id
-                    login
-                    nick
-                    avatar {
-                        url
-                    }
-         }
-}   
-            `
-          
-        }
-      ),
-    }),
+        query: ({_id}) => ({ //тут обов'язково має бути _id
+            document: `query oneUser($query: String){
+                UserFindOne(query: $query){
+                    _id login nick avatar{ url }
+                }
+            }`,
+            variables: {query: JSON.stringify([{_id}])}
+    })}),
 
     userUpsert: builder.mutation({
       query: (user) => ({
@@ -102,4 +100,3 @@ export const {
   useUserUpsertMutation,
 } = api;
 
-  
