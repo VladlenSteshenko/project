@@ -7,13 +7,14 @@ import { store, persistor } from './store';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import UserProfile from './components/User/UserProfile';
-import StoredDataDisplay from "./components/StoredDataDisplay";
+import Entry from './components/Auth/Entry';
 
 const App = () => (
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <Router>
         <Routes>
+          <Route path="/" element={<Entry />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<UserProfile />} />
@@ -21,7 +22,6 @@ const App = () => (
         </Routes>
       </Router>
     </PersistGate>
-    <StoredDataDisplay />
   </Provider>
 );
 

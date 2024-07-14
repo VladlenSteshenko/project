@@ -1,14 +1,16 @@
 // src/components/Auth/Register.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { useRegisterMutation } from '../../api/api';
+import { useNavigate } from 'react-router-dom';
+import { useRegisterMutation, useLoginMutation } from '../../api/api';
 import { setAuth } from '../../reducers/authSlice';
+import { jwtDecode } from 'jwt-decode';
 
 const Register = () => {
-  const [login, setLogin] = useState('');
-  const [password, setPassword] = useState('');
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
   const [registerMutation] = useRegisterMutation();
+  const [loginMutation] = useLoginMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -16,12 +18,17 @@ const Register = () => {
     e.preventDefault();
     try {
       const { data } = await registerMutation({ login, password });
-      if (data.UserUpsert._id) {
-        // You can dispatch any relevant data to the store if needed
-        navigate('/login');
+      if (data.UserUpsert) {
+        // Perform login after successful registration
+        const loginResponse = await loginMutation({ login, password });
+        if (loginResponse.data.login) {
+          const decodedToken = jwtDecode(loginResponse.data.login);
+          dispatch(setAuth({ token: loginResponse.data.login, user: decodedToken }));
+          navigate("/profile");
+        }
       }
     } catch (error) {
-      console.error('Registration error', error);
+      console.error("Registration error", error);
     }
   };
 
@@ -49,3 +56,4 @@ const Register = () => {
 };
 
 export default Register;
+

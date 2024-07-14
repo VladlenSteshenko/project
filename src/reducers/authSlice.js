@@ -1,43 +1,41 @@
 // src/store/authSlice.js
 import { createSlice } from "@reduxjs/toolkit";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode }  from "jwt-decode";
 
 const initialState = {
-  token: localStorage.getItem("token") || null,
-  payload: localStorage.getItem("payload")
-    ? JSON.parse(localStorage.getItem("payload"))
-    : null,
+  token: null,
+  payload: null,
+  profile: null,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setAuth(state, action) {console.log(33333333333333,action.payload.token)
+    setAuth(state, action) {
       const decodedToken = jwtDecode(action.payload.token);
       state.token = action.payload.token;
       state.payload = decodedToken;
-      localStorage.setItem("token", action.payload.token);
-      localStorage.setItem("payload", JSON.stringify(decodedToken));
-      localStorage.setItem("id", decodedToken.id)
-      console.log(444444444444444444,JSON.stringify(decodedToken))
     },
     setUser(state, action) {
       state.payload = action.payload;
     },
+    setProfile(state, action) {
+      state.profile = action.payload;
+    },
     logout(state) {
       state.token = null;
       state.payload = null;
-      localStorage.removeItem("token");
-      localStorage.removeItem("payload");
-      localStorage.removeItem("id");
+      state.profile = null;
     },
   },
 });
 
-export const { setAuth, setUser, logout } = authSlice.actions;
+export const { setAuth, setUser, setProfile, logout } = authSlice.actions;
 
 export default authSlice.reducer;
+
+
 
 
   

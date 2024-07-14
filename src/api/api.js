@@ -4,24 +4,26 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
 // Create a wrapper around graphqlRequestBaseQuery that logs the query
 const logQueryBaseQuery = (baseQuery) => async (args, api, extraOptions) => {
-    // Log the query
-    console.log("Query:", args.document);
-  
-    // Send the query to the API
-    return await baseQuery(args, api, extraOptions);
-  };
-  export const api = createApi({
-    baseQuery: logQueryBaseQuery(graphqlRequestBaseQuery({
-      url: "http://chat.ed.asmer.org.ua/graphql",  // Make sure to replace this with your actual API URL
+  // Log the query
+  console.log("Query:", args.document);
+
+  // Send the query to the API
+  return await baseQuery(args, api, extraOptions);
+};
+export const api = createApi({
+  baseQuery: logQueryBaseQuery(
+    graphqlRequestBaseQuery({
+      url: "http://chat.ed.asmer.org.ua/graphql", 
       prepareHeaders(headers, { getState }) {
         const { token } = getState().auth;
         if (token) {
           headers.set("Authorization", `Bearer ${token}`);
         }
-  
-      return headers;
-    },
-  })),
+
+        return headers;
+      },
+    })
+  ),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: ({ login, password }) => ({
@@ -62,15 +64,27 @@ const logQueryBaseQuery = (baseQuery) => async (args, api, extraOptions) => {
         `,
       }),
     }),
+ 
     userFindOne: builder.query({
-        query: ({_id}) => ({ //тут обов'язково має бути _id
-            document: `query oneUser($query: String){
-                UserFindOne(query: $query){
-                    _id login nick avatar{ url }
+      query: ({ _id }) => ({
+        document: `query oneUser($query: String){
+              UserFindOne(query: $query){
+                _id
+                login
+                nick
+                createdAt
+                avatar {
+                  url
                 }
-            }`,
-            variables: {query: JSON.stringify([{_id}])}
-    })}),
+
+              }
+          }`,
+        variables: { query: JSON.stringify([{ _id }]) },
+      }),
+      providesTags: (result, error, { _id }) => {
+        return [{ type: "User", id: _id }];
+      },
+    }),
 
     userUpsert: builder.mutation({
       query: (user) => ({
@@ -89,8 +103,25 @@ const logQueryBaseQuery = (baseQuery) => async (args, api, extraOptions) => {
         variables: { user },
       }),
     }),
+
+    setUserNick: builder.mutation({
+      query: ({ _id, nick }) => ({
+        document: `
+          mutation setNick($_id: String, $nick: String) {
+            UserUpsert(user: { _id: $_id, nick: $nick }) {
+              _id
+              nick
+            }
+          }
+        `,
+        variables: { _id, nick },
+      }),
+      invalidatesTags: (result, error, { _id }) => [{ type: 'User', id: _id }],
+    }),
+
   }),
 });
+
 
 export const {
   useLoginMutation,
@@ -98,5 +129,5 @@ export const {
   useUserFindQuery,
   useUserFindOneQuery,
   useUserUpsertMutation,
+  useSetUserNickMutation
 } = api;
-

@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../api/api';
-import { setAuth } from '../../reducers/authSlice';
-import {jwtDecode} from "jwt-decode";
+import { setAuth, setProfile } from '../../reducers/authSlice';
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const [login, setLogin] = useState("");
@@ -15,12 +15,11 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try { console.log(2222222222222222222,login,password)
+    try {
       const { data } = await loginMutation({ login, password });
       if (data.login) {
         const decodedToken = jwtDecode(data.login);
         dispatch(setAuth({ token: data.login, user: decodedToken }));
-        console.log(111111111111111,data.login)
         navigate("/profile");
       }
     } catch (error) {
@@ -52,6 +51,7 @@ const Login = () => {
 };
 
 export default Login;
+
 
   
 
