@@ -119,6 +119,30 @@ export const api = createApi({
       invalidatesTags: (result, error, { _id }) => [{ type: 'User', id: _id }],
     }),
 
+    userChats: builder.query({
+      query: (userId) => ({
+        document: `
+          query getUserChats($userId: String) {
+            ChatFind(query: $userId) {
+              chats {
+                _id
+                title
+                lastMessage {
+                  text
+                  createdAt
+                }
+                avatar {
+                  url
+                }
+              }
+            }
+          }
+        `,
+        variables: { userId: JSON.stringify([{ _id: userId }]) },
+      }),
+    }),
+
+
   }),
 });
 
@@ -129,5 +153,6 @@ export const {
   useUserFindQuery,
   useUserFindOneQuery,
   useUserUpsertMutation,
-  useSetUserNickMutation
+  useSetUserNickMutation,
+  useUserChatsQuery
 } = api;

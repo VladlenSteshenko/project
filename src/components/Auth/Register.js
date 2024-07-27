@@ -24,7 +24,7 @@ const Register = () => {
         if (loginResponse.data.login) {
           const decodedToken = jwtDecode(loginResponse.data.login);
           dispatch(setAuth({ token: loginResponse.data.login, user: decodedToken }));
-          navigate("/profile");
+          navigate("/chat");
         }
       }
     } catch (error) {

@@ -20,7 +20,7 @@ const Login = () => {
       if (data.login) {
         const decodedToken = jwtDecode(data.login);
         dispatch(setAuth({ token: data.login, user: decodedToken }));
-        navigate("/profile");
+        navigate("/chat");
       }
     } catch (error) {
       console.error("Login error", error);

@@ -1,0 +1,11 @@
+/* src/components/Auth/Entry.css */
+.entry{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.entry button {
+  margin-top: 20px;
+}

@@ -8,6 +8,7 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import UserProfile from './components/User/UserProfile';
 import Entry from './components/Auth/Entry';
+import ChatPage from './components/Chat/ChatPage';
 
 const App = () => (
   <Provider store={store}>
@@ -19,6 +20,7 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="/chat" element={<ChatPage />} />
         </Routes>
       </Router>
     </PersistGate>

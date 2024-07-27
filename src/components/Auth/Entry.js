@@ -7,7 +7,7 @@ const Entry = () => {
   const [isRegister, setIsRegister] = useState(false);
 
   return (
-    <div>
+    <div className="entry">
       <button onClick={() => setIsRegister(!isRegister)}>
         {isRegister ? "Switch to Login" : "Switch to Register"}
       </button>

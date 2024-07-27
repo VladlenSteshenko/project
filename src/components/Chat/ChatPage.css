@@ -1,0 +1,136 @@
+/* src/components/Chat/ChatPage.css */
+.chat-page {
+  display: flex;
+  height: 100vh;
+}
+
+.chat-list {
+  width: 25%;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-view {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ddd;
+}
+
+.chat-info {
+  width: 25%;
+  padding: 20px;
+}
+
+.search-bar {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.chats {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-item {
+  display: flex;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.chat-item img {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+}
+
+.chat-item div {
+  flex: 1;
+}
+
+.chat-item h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.chat-item p {
+  margin: 5px 0;
+}
+
+.chat-item span {
+  font-size: 12px;
+  color: #999;
+}
+
+.message-item {
+  display: flex;
+  padding: 10px;
+}
+
+.message-item img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.message-item div {
+  flex: 1;
+}
+
+.message-item h5 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.message-item p {
+  margin: 5px 0;
+}
+
+.message-item span {
+  font-size: 12px;
+  color: #999;
+}
+
+.message-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.message-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.message-input button {
+  margin-left: 10px;
+  padding: 10px 20px;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.user-item img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.toProfile-button {
+  padding: 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+
+.toProfile-button:hover {
+  background-color: #0056b3;
+}
