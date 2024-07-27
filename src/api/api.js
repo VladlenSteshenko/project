@@ -13,7 +13,7 @@ const logQueryBaseQuery = (baseQuery) => async (args, api, extraOptions) => {
 export const api = createApi({
   baseQuery: logQueryBaseQuery(
     graphqlRequestBaseQuery({
-      url: "http://chat.ed.asmer.org.ua/graphql", 
+      url: "http://chat.ed.asmer.org.ua/graphql",
       prepareHeaders(headers, { getState }) {
         const { token } = getState().auth;
         if (token) {
@@ -64,7 +64,7 @@ export const api = createApi({
         `,
       }),
     }),
- 
+
     userFindOne: builder.query({
       query: ({ _id }) => ({
         document: `query oneUser($query: String){
@@ -116,36 +116,47 @@ export const api = createApi({
         `,
         variables: { _id, nick },
       }),
-      invalidatesTags: (result, error, { _id }) => [{ type: 'User', id: _id }],
+      invalidatesTags: (result, error, { _id }) => [{ type: "User", id: _id }],
     }),
 
     userChats: builder.query({
-      query: (userId) => ({
+      query: ({ _id }) => ({
         document: `
-          query getUserChats($userId: String) {
-            ChatFind(query: $userId) {
+          query userChats($query: String) {
+            UserFindOne(query: $query) {
+              _id
               chats {
                 _id
                 title
-                lastMessage {
-                  text
-                  createdAt
-                }
-                avatar {
-                  url
-                }
               }
             }
           }
         `,
-        variables: { userId: JSON.stringify([{ _id: userId }]) },
+        variables: { query: JSON.stringify([{ _id }]) },
       }),
+      providesTags: (result, error, { _id }) => {
+        return [{ type: "User", id: _id }];
+      },
     }),
 
+    chatUpsert: builder.mutation({
+      query: ({ title, ownerId }) => ({
+        document: `
+          mutation createChat($title: String, $ownerId: ID) {
+            ChatUpsert(chat: { title: $title, members: [{ _id: $ownerId }] }) {
+              _id
+              title
+            }
+          }
+        `,
+        variables: { title, ownerId },
+      }),
+      invalidatesTags: ["Chat"],
+    }),
 
+  
   }),
 });
-
 
 export const {
   useLoginMutation,
@@ -154,5 +165,6 @@ export const {
   useUserFindOneQuery,
   useUserUpsertMutation,
   useSetUserNickMutation,
-  useUserChatsQuery
+  useUserChatsQuery,
+  useChatUpsertMutation
 } = api;

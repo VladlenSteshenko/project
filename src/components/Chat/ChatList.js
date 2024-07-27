@@ -1,8 +1,8 @@
 // src/components/Chat/ChatList.js
-import React from 'react';
+import React,{useState} from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useUserChatsQuery } from '../../api/api';
+import { useUserChatsQuery, useChatUpsertMutation} from '../../api/api';
 import './ChatPage.css';
 
 const mockChats = [
@@ -10,21 +10,43 @@ const mockChats = [
   { id: 2, name: "Chat 2", lastMessage: "Hi", lastMessageTime: "11:00 AM", image: "https://via.placeholder.com/50" },
 ];
 
-const hardcodedUserId = "5e0b45f346d29f39453971d3";
+const hardcodedUserId = "66881c5cadf3bd0ee7be9879";
 
 const ChatList = () => {
-  const user = useSelector((state) => state.auth.user);
-  const { data, error, isLoading } =  useUserChatsQuery({ members: hardcodedUserId });
+  const user = useSelector((state) => state.auth.payload);
+  const userId = user?.sub?.id || hardcodedUserId; 
+  console.log(userId )
+  const { data, error, isLoading } = useUserChatsQuery({ members: userId });
+  const [createChat] = useChatUpsertMutation();
+  const [newChatTitle, setNewChatTitle] = useState('');
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading chats</div>;
-
+  console.log(data)
   const chats = data?.ChatFind || [];
+
+  const handleCreateChat = async () => {
+    if (!newChatTitle) return;
+
+    try {
+      await createChat({ title: newChatTitle, ownerId: userId }).unwrap();
+      setNewChatTitle('');
+    } catch (err) {
+      console.error('Failed to create chat:', err);
+    }
+  };
 
   return (
     <div className="chat-list">
-      <button className="create-chat-button">Create New Chat</button>
-      <button className="join-chat-button">Join Chat</button>
+      <div className="chat-actions">
+        <input
+          type="text"
+          value={newChatTitle}
+          onChange={(e) => setNewChatTitle(e.target.value)}
+          placeholder="New chat title"
+        />
+        <button onClick={handleCreateChat}>Create New Chat</button>
+      </div>
       <ul>
         {chats.map((chat) => (
           <li key={chat._id} onClick={() => alert(`Chat ID: ${chat._id}, Name: ${chat.title || 'Untitled Chat'}`)}>
