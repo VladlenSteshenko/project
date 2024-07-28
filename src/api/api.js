@@ -1,5 +1,4 @@
 // src/api/api.js http://chat.ed.asmer.org.ua/graphql
-// src/api/api.js
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
 // Create a wrapper around graphqlRequestBaseQuery that logs the query
@@ -123,14 +122,28 @@ export const api = createApi({
       query: ({ _id }) => ({
         document: `
           query userChats($query: String) {
-            UserFindOne(query: $query) {
-              _id
-              chats {
+              UserFindOne(query: $query) {
                 _id
-                title
+                login
+                nick
+                createdAt
+                avatar {
+                  url
+                }
+                chats {
+                  _id
+                  title
+                  lastModified
+                  members {
+                    _id
+                    nick
+                  }
+                  avatar {
+                    url
+                  }
+                }
               }
             }
-          }
         `,
         variables: { query: JSON.stringify([{ _id }]) },
       }),
