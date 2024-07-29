@@ -13,14 +13,9 @@ const mockChats = [
 const ChatList = () => {
   const user = useSelector((state) => state.auth.payload);
   const userId = user?.sub?.id;
-  const { data, error, isLoading } = useUserChatsQuery({ _id: userId });
+  const chats = useSelector((state) => state.chat.chatList) || mockChats;
   const [createChat] = useChatUpsertMutation();
   const [newChatTitle, setNewChatTitle] = useState('');
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading chats</div>;
-
-  const chats = data?.UserFindOne.chats || mockChats;
 
   const handleCreateChat = async () => {
     if (!newChatTitle) return;

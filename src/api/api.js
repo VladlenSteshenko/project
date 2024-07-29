@@ -167,6 +167,34 @@ export const api = createApi({
       invalidatesTags: ["Chat"],
     }),
 
+    actionAboutMe: builder.query({
+      query: ({ _id }) => ({
+        document: `query actionAboutMe($query: String) {
+          UserFindOne(query: $query) {
+            _id
+            login
+            nick
+            createdAt
+            avatar {
+              url
+            }
+            chats {
+              _id
+              title
+              lastModified
+              members {
+                _id
+                nick
+              }
+              avatar {
+                url
+              }
+            }
+          }
+        }`,
+        variables: { query: JSON.stringify([{ _id }]) }
+      }),
+    }),
   
   }),
 });
@@ -179,5 +207,6 @@ export const {
   useUserUpsertMutation,
   useSetUserNickMutation,
   useUserChatsQuery,
-  useChatUpsertMutation
+  useChatUpsertMutation,
+  useActionAboutMeQuery
 } = api;

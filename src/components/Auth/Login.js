@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../api/api';
 import { setAuth, setProfile } from '../../reducers/authSlice';
 import { jwtDecode } from "jwt-decode";
+import { loginThunk } from '../../thunks/authThunks';
+
 
 const Login = () => {
   const [login, setLogin] = useState("");
@@ -16,16 +18,16 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await loginMutation({ login, password });
-      if (data.login) {
-        const decodedToken = jwtDecode(data.login);
-        dispatch(setAuth({ token: data.login, user: decodedToken }));
-        navigate("/chat");
-      }
-    } catch (error) {
-      console.error("Login error", error);
+      dispatch(loginThunk({ login, password })).unwrap();
+      navigate("/chat");
+
+      // Redirect or handle successful login
+    } catch (err) {
+      console.error('Failed to login:', err);
+      // Handle login failure
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit}>
