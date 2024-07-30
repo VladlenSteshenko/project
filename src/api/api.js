@@ -153,16 +153,17 @@ export const api = createApi({
     }),
 
     chatUpsert: builder.mutation({
-      query: ({ title, ownerId }) => ({
+      query: ({ title }) => ({
         document: `
-          mutation createChat($title: String, $ownerId: ID) {
-            ChatUpsert(chat: { title: $title, members: [{ _id: $ownerId }] }) {
+          mutation createChat($title: String) {
+            ChatUpsert(chat: { title: $title }) {
               _id
               title
             }
           }
+            
         `,
-        variables: { title, ownerId },
+        variables: { title},
       }),
       invalidatesTags: ["Chat"],
     }),

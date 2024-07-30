@@ -4,8 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useUserChatsQuery, useChatUpsertMutation} from '../../api/api';
 import './ChatPage.css';
-import socket from '../../socket';
-import { setChatList, addChat } from '../../reducers/chatSlice';
+import { setChatList, setSelectedChat, addChat } from '../../reducers/chatSlice';
 
 const mockChats = [
   { _id: 1, title: "Chat 1", lastMessage: { text: "Hello" }, lastModified: "1620196188000", avatar: { url: "https://via.placeholder.com/50" } },
@@ -21,18 +20,22 @@ const ChatList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data, error, isLoading } = useUserChatsQuery({ _id: userId });
-
   
 
   const handleCreateChat = async () => {
     if (!newChatTitle) return;
 
     try {
-      await createChat({ title: newChatTitle, ownerId: userId }).unwrap();
+      await createChat({ title: newChatTitle }).unwrap();
       setNewChatTitle('');
     } catch (err) {
       console.error('Failed to create chat:', err);
     }
+  };
+
+
+  const handleChatClick = (chat) => {
+    dispatch(setSelectedChat(chat));
   };
   useEffect(() => {
     if (data) {
@@ -41,7 +44,7 @@ const ChatList = () => {
   }, [data, dispatch]);
 
   // Set up socket listener for new chats
-  useEffect(() => {
+ /* useEffect(() => {
     console.log('Setting up socket listener for new chats');
     socket.on('chat', (chat) => {
       console.log('Received new chat from socket:', chat);
@@ -53,9 +56,11 @@ const ChatList = () => {
       socket.off('chat');
     };
   }, [dispatch]);
+  */
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading chats</div>;
+
 
   return (
     <div className="chat-list">
@@ -70,7 +75,7 @@ const ChatList = () => {
       </div>
       <ul>
         {chats.map((chat) => (
-          <li key={chat._id} onClick={() => alert(`Chat ID: ${chat._id}, Name: ${chat.title || 'Untitled Chat'}`)}>
+            <li key={chat._id} onClick={() => handleChatClick(chat)}>
             <div className="chat-avatar">
               <img src={chat.avatar?.url || 'default-avatar.png'} alt="avatar" />
             </div>

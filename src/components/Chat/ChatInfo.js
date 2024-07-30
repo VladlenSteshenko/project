@@ -1,7 +1,7 @@
 // src/components/Chat/ChatInfo.js
 import React from 'react';
 import './ChatPage.css';
-
+import { useSelector } from 'react-redux';
 const mockChatInfo = {
   name: "Chat 1",
   createdAt: "2024-07-10",
@@ -12,20 +12,26 @@ const mockChatInfo = {
   ],
 };
 
-const ChatInfo = ({ selectedChat }) => {
-  const chatInfo = selectedChat ? selectedChat : mockChatInfo; // Replace with actual data fetching logic
+const ChatInfo = () => {
+  const selectedChat = useSelector((state) => state.chat.selectedChat);
+
+  if (!selectedChat) {
+    return <div className="chat-info">Select a chat to see details</div>;
+  }
 
   return (
     <div className="chat-info">
-      <h3>{chatInfo.name}</h3>
-      <p>Created At: {chatInfo.createdAt}</p>
-      <p>{chatInfo.description}</p>
-      <h4>Users</h4>
+      <h3>{selectedChat.title || 'Untitled Chat'}</h3>
+      <p>Last Modified: {selectedChat.lastModified ? new Date(parseInt(selectedChat.lastModified)).toLocaleString() : ''}</p>
+      <div className="chat-avatar">
+        <img src={selectedChat.avatar?.url || 'default-avatar.png'} alt="avatar" />
+      </div>
+      <h4>Members</h4>
       <div className="users">
-        {chatInfo.users.map(user => (
-          <div key={user.id} className="user-item">
-            <img src={user.avatar} alt={user.name} />
-            <span>{user.name}</span>
+        {selectedChat.members.map(user => (
+          <div key={user._id} className="user-item">
+            <img src={user.avatar?.url || 'https://via.placeholder.com/30'} alt={user.nick} />
+            <span>{user.nick}</span>
           </div>
         ))}
       </div>
