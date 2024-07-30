@@ -1,9 +1,11 @@
 // src/components/Chat/ChatList.js
-import React,{useState} from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useUserChatsQuery, useChatUpsertMutation} from '../../api/api';
 import './ChatPage.css';
+import socket from '../../socket';
+import { setChatList, addChat } from '../../reducers/chatSlice';
 
 const mockChats = [
   { _id: 1, title: "Chat 1", lastMessage: { text: "Hello" }, lastModified: "1620196188000", avatar: { url: "https://via.placeholder.com/50" } },
@@ -16,6 +18,11 @@ const ChatList = () => {
   const chats = useSelector((state) => state.chat.chatList) || mockChats;
   const [createChat] = useChatUpsertMutation();
   const [newChatTitle, setNewChatTitle] = useState('');
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { data, error, isLoading } = useUserChatsQuery({ _id: userId });
+
+  
 
   const handleCreateChat = async () => {
     if (!newChatTitle) return;
@@ -27,6 +34,28 @@ const ChatList = () => {
       console.error('Failed to create chat:', err);
     }
   };
+  useEffect(() => {
+    if (data) {
+      dispatch(setChatList(data.UserFindOne.chats));
+    }
+  }, [data, dispatch]);
+
+  // Set up socket listener for new chats
+  useEffect(() => {
+    console.log('Setting up socket listener for new chats');
+    socket.on('chat', (chat) => {
+      console.log('Received new chat from socket:', chat);
+      dispatch(addChat(chat));
+    });
+
+    return () => {
+      console.log('Removing socket listener for new chats');
+      socket.off('chat');
+    };
+  }, [dispatch]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading chats</div>;
 
   return (
     <div className="chat-list">

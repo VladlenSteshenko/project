@@ -9,14 +9,12 @@ import { setAuth } from '../reducers/authSlice';
 export const loginThunk = createAsyncThunk(
   'auth/login',
   async ({ login, password }, { dispatch }) => {
-    const response = await api.endpoints.login.initiate({ login, password });
+    const response = await dispatch(api.endpoints.login.initiate({ login, password }));
     if (response.data && response.data.login) {
       const token = response.data.login;
       const payload = jwtDecode(token);
       const decodedToken = jwtDecode(response.data.login);
       dispatch(setAuth({ token: response.data.login, user: decodedToken }));
-     
-      console.log(111111111111111)
       // Fetch user profile and chat data after successful login
       dispatch(fetchAboutMeThunk());
     }
@@ -36,13 +34,9 @@ export const registerThunk = createAsyncThunk(
 export const fetchAboutMeThunk = createAsyncThunk(
   'auth/fetchAboutMe',
   async (_, { dispatch, getState }) => {
-    console.log(222222222222)
     const state = getState();
-    console.log(33333333333333)
     const userId = state.auth.payload.sub.id;
-    console.log(4444444444444,userId)
-    const response = await api.endpoints.actionAboutMe.initiate({ _id: userId });
-    console.log(555555555555,response.data)
+    const response = await dispatch(api.endpoints.actionAboutMe.initiate({ _id: userId }));
 
     if (response.data) {
       const { UserFindOne } = response.data;
