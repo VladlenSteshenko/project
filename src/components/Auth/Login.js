@@ -6,9 +6,7 @@ import { useLoginMutation } from '../../api/api';
 import { setAuth, setProfile } from '../../reducers/authSlice';
 import { jwtDecode } from "jwt-decode";
 import { loginThunk } from '../../thunks/authThunks';
-import { io } from 'socket.io-client';
-
-
+import { connectSocket } from '../../thunks/chatThunks';
 
 const Login = () => {
   const [login, setLogin] = useState("");
@@ -20,9 +18,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      dispatch(loginThunk({ login, password })).unwrap();
-      
-      const socket = io('ws://chat.ed.asmer.org.ua'); 
+      await dispatch(loginThunk({ login, password })).unwrap();
+      await dispatch(connectSocket()).unwrap();
       navigate("/chat");
       // Redirect or handle successful login
     } catch (err) {

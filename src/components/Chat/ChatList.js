@@ -6,6 +6,8 @@ import { useUserChatsQuery, useChatUpsertMutation} from '../../api/api';
 import './ChatPage.css';
 import { setChatList, setSelectedChat, addChat } from '../../reducers/chatSlice';
 
+
+
 const mockChats = [
   { _id: 1, title: "Chat 1", lastMessage: { text: "Hello" }, lastModified: "1620196188000", avatar: { url: "https://via.placeholder.com/50" } },
   { _id: 2, title: "Chat 2", lastMessage: { text: "Hi" },lastModified: "1620196188000", avatar: { url: "https://via.placeholder.com/50" } },
@@ -14,7 +16,7 @@ const mockChats = [
 const ChatList = () => {
   const user = useSelector((state) => state.auth.payload);
   const userId = user?.sub?.id;
-  const chats = useSelector((state) => state.chat.chatList) || mockChats;
+  const chats = useSelector((state) => Object.values(state.chat.chatList)) || mockChats;
   const [createChat] = useChatUpsertMutation();
   const [newChatTitle, setNewChatTitle] = useState('');
   const dispatch = useDispatch();
@@ -36,15 +38,17 @@ const ChatList = () => {
 
   const handleChatClick = (chat) => {
     dispatch(setSelectedChat(chat));
+    //dispatch(fetchMessagesForChat(chat._id));
+
   };
-  useEffect(() => {
+  /*useEffect(() => {
     if (data) {
       dispatch(setChatList(data.UserFindOne.chats));
     }
   }, [data, dispatch]);
 
   // Set up socket listener for new chats
- /* useEffect(() => {
+ useEffect(() => {
     console.log('Setting up socket listener for new chats');
     socket.on('chat', (chat) => {
       console.log('Received new chat from socket:', chat);

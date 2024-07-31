@@ -12,13 +12,13 @@ export const loginThunk = createAsyncThunk(
     const response = await dispatch(api.endpoints.login.initiate({ login, password }));
     if (response.data && response.data.login) {
       const token = response.data.login;
+      console.log(2222222222222222222222222,token)
       const payload = jwtDecode(token);
       const decodedToken = jwtDecode(response.data.login);
-      dispatch(setAuth({ token: response.data.login, user: decodedToken }));
+      dispatch(setAuth({ token, user: decodedToken }));
       // Fetch user profile and chat data after successful login
       dispatch(fetchAboutMeThunk());
-      const socket = io("ws://chat.ed.asmer.org.ua")
-      socket.emit ('jwt', token)
+      
     }
   }
 );
