@@ -17,6 +17,8 @@ export const loginThunk = createAsyncThunk(
       dispatch(setAuth({ token: response.data.login, user: decodedToken }));
       // Fetch user profile and chat data after successful login
       dispatch(fetchAboutMeThunk());
+      const socket = io("ws://chat.ed.asmer.org.ua")
+      socket.emit ('jwt', token)
     }
   }
 );
