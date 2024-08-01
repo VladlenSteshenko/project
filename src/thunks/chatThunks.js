@@ -8,6 +8,7 @@ import {
   addMessage,
 } from '../reducers/chatSlice';
 import io from 'socket.io-client';
+import { api } from '../api/api';
 
 const socket = io("ws://chat.ed.asmer.org.ua")
 
@@ -55,11 +56,20 @@ export const connectSocket = createAsyncThunk(
   }
 );
 
-/*export const fetchMessagesForChat = createAsyncThunk(
-  'chat/fetchMessagesForChat',
-  async (chatId, { dispatch }) => {
-    // Request messages for the selected chat
-    socket.emit('getChatMessages', chatId);
+export const fetchChatMessages = createAsyncThunk(
+  'chat/fetchChatMessages',
+  async ({ chatID, offset }, { dispatch }) => {
+    console.log(123123)
+    try {
+      const response = await api.endpoints.getMessages.initiate({ chatID, offset });
+      console.log('aaaaaaaaaa:', response);
+      const data = await response.data;
+      console.log('API Response:', data);
+      dispatch(setSelectedChatMessages({ chatID, messages: data.MessageFind }));
+    } catch (error) {
+      console.error('Error fetching chat messages:', error);
+      throw error; // Re-throw the error to be handled by the calling code
+    }
   }
 );
-*/
+

@@ -1,35 +1,59 @@
 // src/components/Chat/ChatView.js
 import React from 'react';
+import { useSelector } from 'react-redux';
 import './ChatPage.css';
 
 const mockMessages = [
-  { id: 1, text: "Hello", author: "User 1", avatar: "https://via.placeholder.com/30", time: "10:00 AM" },
-  { id: 2, text: "Hi", author: "User 2", avatar: "https://via.placeholder.com/30", time: "10:05 AM" },
+  {
+    id: 1,
+    text: "Hello",
+    author: "User 1",
+    avatar: "https://via.placeholder.com/30",
+    time: "10:00 AM",
+  },
+  {
+    id: 2,
+    text: "Hi",
+    author: "User 2",
+    avatar: "https://via.placeholder.com/30",
+    time: "10:05 AM",
+  },
 ];
 
-const ChatView = ({ selectedChat }) => {
-  const messages = mockMessages; // Replace with actual data fetching logic
+const ChatView = () => {
+  const selectedChat = useSelector((state) => state.chat.selectedChat);
+  const selectedChatMessages = useSelector((state) => state.chat.selectedChatMessages[selectedChat?._id]);
+  console.log(111111111111111111111111111, selectedChatMessages);
+
+  if (!selectedChat) {
+    return <div className="chat-view">Select a chat to view messages</div>;
+  }
+
+  if (!selectedChatMessages) {
+    return <div className="chat-view">No messages available</div>;
+  }
 
   return (
     <div className="chat-view">
-      <div className="messages">
-        {messages.map(message => (
-          <div key={message.id} className="message-item">
-            <img src={message.avatar} alt={message.author} />
-            <div>
-              <h5>{message.author}</h5>
-              <p>{message.text}</p>
-              <span>{message.time}</span>
+      <h3>{selectedChat.title || 'Untitled Chat'}</h3>
+      <ul>
+        {selectedChatMessages.map((message) => (
+          <li key={message._id} className="message-item">
+            <div className="message-avatar">
+              <img src={message.owner?.avatar?.url || "https://via.placeholder.com/30"} alt="avatar" />
             </div>
-          </div>
+            <div className="message-content">
+              <span className="message-author">{message.owner?.nick}</span>
+              <p className="message-text">{message.text}</p>
+              <span className="message-time">{new Date(parseInt(message.createdAt)).toLocaleString()}</span>
+            </div>
+          </li>
         ))}
-      </div>
-      <div className="message-input">
-        <input type="text" placeholder="Type a message..." />
-        <button>Add Media</button>
-      </div>
+      </ul>
     </div>
   );
 };
 
+
 export default ChatView;
+

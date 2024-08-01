@@ -196,6 +196,54 @@ export const api = createApi({
         variables: { query: JSON.stringify([{ _id }]) }
       }),
     }),
+
+    getMessages: builder.query({
+      query: ({ chatID, offset }) => ({
+        document: {
+          query: `
+            query getMessages($chatID: ID!, $offset: String!) {
+              MessageFind(
+                query: "[{\\"chat._id\\": \\"${chatID}\\"}, {\\"sort\\": [{\\"_id\\": -1}]}, {\\"limit\\": 100}, {\\"offset\\": ${offset}}]"
+              ) {
+                _id
+                createdAt
+                owner {
+                  _id
+                  nick
+                  avatar {
+                    url
+                  }
+                }
+                text
+                chat {
+                  _id
+                }
+                media {
+                  _id
+                  url
+                }
+                replies {
+                  _id
+                }
+                replyTo {
+                  _id
+                }
+                forwarded {
+                  _id
+                }
+              }
+            }
+          `,
+          variables: {
+            chatID,
+            offset,
+          },
+        },
+      }),
+    }),
+
+
+
   
   }),
 });
@@ -209,5 +257,6 @@ export const {
   useSetUserNickMutation,
   useUserChatsQuery,
   useChatUpsertMutation,
-  useActionAboutMeQuery
+  useActionAboutMeQuery,
+  useGetMessagesQuery
 } = api;

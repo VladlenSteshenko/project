@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserChatsQuery, useChatUpsertMutation} from '../../api/api';
 import './ChatPage.css';
 import { setChatList, setSelectedChat, addChat } from '../../reducers/chatSlice';
-
+import { fetchChatMessages } from '../../thunks/chatThunks'
 
 
 const mockChats = [
@@ -38,29 +38,9 @@ const ChatList = () => {
 
   const handleChatClick = (chat) => {
     dispatch(setSelectedChat(chat));
-    //dispatch(fetchMessagesForChat(chat._id));
-
+    dispatch(fetchChatMessages({ chatID: chat._id, offset: 0 }));
   };
-  /*useEffect(() => {
-    if (data) {
-      dispatch(setChatList(data.UserFindOne.chats));
-    }
-  }, [data, dispatch]);
 
-  // Set up socket listener for new chats
- useEffect(() => {
-    console.log('Setting up socket listener for new chats');
-    socket.on('chat', (chat) => {
-      console.log('Received new chat from socket:', chat);
-      dispatch(addChat(chat));
-    });
-
-    return () => {
-      console.log('Removing socket listener for new chats');
-      socket.off('chat');
-    };
-  }, [dispatch]);
-  */
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading chats</div>;
