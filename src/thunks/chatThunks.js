@@ -61,7 +61,7 @@ export const fetchChatMessages = createAsyncThunk(
   async ({ chatID, offset }, { dispatch }) => {
     console.log(123123)
     try {
-      const response = await api.endpoints.getMessages.initiate({ chatID, offset });
+      const response = await dispatch(api.endpoints.getMessages.initiate({ chatID, offset }));
       console.log('aaaaaaaaaa:', response);
       const data = await response.data;
       console.log('API Response:', data);

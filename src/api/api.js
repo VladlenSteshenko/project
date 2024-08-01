@@ -201,7 +201,7 @@ export const api = createApi({
       query: ({ chatID, offset }) => ({
         document: {
           query: `
-            query getMessages($chatID: ID!, $offset: String!) {
+            query getMessages($chatID: ID!, $offset: Int!) {
               MessageFind(
                 query: "[{\\"chat._id\\": \\"${chatID}\\"}, {\\"sort\\": [{\\"_id\\": -1}]}, {\\"limit\\": 100}, {\\"offset\\": ${offset}}]"
               ) {
