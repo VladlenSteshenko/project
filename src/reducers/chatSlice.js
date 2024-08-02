@@ -25,9 +25,13 @@ const chatSlice = createSlice({
         state.chatList[chatId].lastMessage = lastMessage;
       }
     },
-    setSelectedChatMessages(state, action) {
-      const { chatId, messages } = action.payload;
-      state.selectedChatMessages[chatId] = messages;
+    setSelectedChatMessages: (state, action) => {
+      const { chatID, messages } = action.payload;
+      const messageObject = messages.reduce((acc, message) => {
+        acc[message._id] = message;
+        return acc;
+      }, {});
+      state.selectedChatMessages[chatID] = messageObject;
     },
     addMessage(state, action) {
       const { chatId, message } = action.payload;
