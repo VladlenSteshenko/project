@@ -163,7 +163,7 @@ export const api = createApi({
           }
             
         `,
-        variables: { title},
+        variables: { title },
       }),
       invalidatesTags: ["Chat"],
     }),
@@ -193,7 +193,7 @@ export const api = createApi({
             }
           }
         }`,
-        variables: { query: JSON.stringify([{ _id }]) }
+        variables: { query: JSON.stringify([{ _id }]) },
       }),
     }),
 
@@ -233,16 +233,37 @@ export const api = createApi({
               }
             }
           `,
-          variables: {
-            chatID,
-            offset,
-          },
+        variables: {
+          chatID,
+          offset,
+        },
       }),
     }),
 
-
-
-  
+    MessageUpsert: builder.mutation({
+      query: ({ chatID, text }) => ({
+        document: `
+          mutation MessageUpsert($chatID: ID, $text: String) {
+            MessageUpsert(message: { chat: { _id: $chatID }, text: $text }) {
+              _id
+              createdAt
+              text
+              owner {
+                _id
+                nick
+                avatar {
+                  url
+                }
+              }
+              chat {
+                _id
+              }
+            }
+          }
+        `,
+        variables: { chatID, text },
+      }),
+    }),
   }),
 });
 
@@ -256,5 +277,6 @@ export const {
   useUserChatsQuery,
   useChatUpsertMutation,
   useActionAboutMeQuery,
-  useGetMessagesQuery
+  useGetMessagesQuery,
+  useMessageUpsertMutation
 } = api;

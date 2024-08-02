@@ -33,14 +33,16 @@ const chatSlice = createSlice({
       }, {});
       state.selectedChatMessages[chatID] = messageObject;
     },
-    addMessage(state, action) {
-      const { chatId, message } = action.payload;
-      if (state.selectedChatMessages[chatId]) {
-        state.selectedChatMessages[chatId].push(message);
-      } else {
-        state.selectedChatMessages[chatId] = [message];
+    addMessage: (state, action) => {
+      const { chatID, message } = action.payload;
+      if (state.selectedChatMessages[chatID]) {
+        state.selectedChatMessages[chatID][message._id] = message;
+      }
+      if (state.chatList[chatID]) {
+        state.chatList[chatID].lastMessage = message;
       }
     },
+
   },
 });
 

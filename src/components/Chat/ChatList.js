@@ -59,7 +59,7 @@ const ChatList = () => {
       </div>
       <ul>
         {chats.map((chat) => (
-            <li key={chat._id} onClick={() => handleChatClick(chat)}>
+          <li key={chat._id} onClick={() => handleChatClick(chat)}>
             <div className="chat-avatar">
               <img src={chat.avatar?.url || 'default-avatar.png'} alt="avatar" />
             </div>
@@ -73,7 +73,7 @@ const ChatList = () => {
       </ul>
     </div>
   );
-}
+};
 
 export default ChatList;
 

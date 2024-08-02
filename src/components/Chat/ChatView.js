@@ -1,7 +1,8 @@
 // src/components/Chat/ChatView.js
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import './ChatPage.css';
+import { sendMessage } from '../../thunks/chatThunks';
 
 const mockMessages = [
   {
@@ -21,14 +22,23 @@ const mockMessages = [
 ];
 
 const ChatView = () => {
+  const dispatch = useDispatch();
   const selectedChat = useSelector((state) => state.chat.selectedChat);
   const selectedChatMessages = useSelector((state) => state.chat.selectedChatMessages[selectedChat?._id] || {});
+  const [messageText, setMessageText] = useState('');
 
   if (!selectedChat) {
     return <div className="chat-view">Select a chat to view messages</div>;
   }
 
-  const messagesArray = Object.values(selectedChatMessages);
+  const messagesArray = Object.values(selectedChatMessages).sort((a, b) => parseInt(b.createdAt) - parseInt(a.createdAt));
+  
+  const handleSendMessage = () => {
+    if (messageText.trim()) {
+      dispatch(sendMessage({ chatID: selectedChat._id, text: messageText }));
+      setMessageText('');
+    }
+  };
 
   return (
     <div className="chat-view">
@@ -51,9 +61,19 @@ const ChatView = () => {
           <li>No messages yet</li>
         )}
       </ul>
+      <div className="send-message">
+        <input
+          type="text"
+          value={messageText}
+          onChange={(e) => setMessageText(e.target.value)}
+          placeholder="Type your message"
+        />
+        <button onClick={handleSendMessage}>Send</button>
+      </div>
     </div>
   );
 };
+
 
 export default ChatView;
 
