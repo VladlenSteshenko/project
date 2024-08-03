@@ -6,6 +6,7 @@ import {
   updateLastMessage,
   setSelectedChatMessages,
   addMessage,
+  updateMessage
 } from '../reducers/chatSlice';
 import io from 'socket.io-client';
 import { api } from '../api/api';
@@ -55,6 +56,18 @@ export const sendMessage = createAsyncThunk(
       dispatch(addMessage({ chatID, message: response.MessageUpsert }));
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  }
+);
+
+export const updateChatMessage = createAsyncThunk(
+  'chat/updateChatMessage',
+  async ({ chatId, messageId, newText }, { dispatch }) => {
+    try {
+      const response = await dispatch(api.endpoints.MessageUpdate.initiate({ text: newText, messageid: messageId })).unwrap();
+      dispatch(updateMessage({ chatId, message: response.MessageUpsert }));
+    } catch (error) {
+      console.error('Error updating message:', error);
     }
   }
 );

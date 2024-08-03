@@ -1,9 +1,10 @@
 // src/components/User/UserProfile.js
 import { useSelector, useDispatch } from 'react-redux';
-import { useUserFindOneQuery ,useSetUserNickMutation} from '../../api/api';
+import { useUserFindOneQuery, useSetUserNickMutation } from '../../api/api';
 import { setProfile, logout } from '../../reducers/authSlice';
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { updateUserNickname } from '../../reducers/chatSlice';
 
 const UserProfile = () => {
   const dispatch = useDispatch();
@@ -12,13 +13,13 @@ const UserProfile = () => {
   const profile = useSelector((state) => state.auth.profile);
   const userId = user?.sub?.id;
 
-  const { data, loading, error } = useUserFindOneQuery({ _id: userId });
+  const { data, isLoading, error, refetch } = useUserFindOneQuery({ _id: userId });
   const [setUserNick] = useSetUserNickMutation();
 
   const [nick, setNick] = useState("");
   useEffect(() => {
     if (data && data.UserFindOne) {
-      dispatch(setProfile(data.UserFindOne))
+      dispatch(setProfile(data.UserFindOne));
       setNick(data.UserFindOne.nick || "");
     }
   }, [data, dispatch]);
@@ -27,22 +28,24 @@ const UserProfile = () => {
     dispatch(logout());
     navigate("/");
   };
+
   const handleNickChange = async (e) => {
     e.preventDefault();
     try {
       await setUserNick({ _id: userId, nick });
+      dispatch(updateUserNickname({ userId, newNick: nick })); // Dispatch the action to update nick in chats
+      refetch(); // Refetch user data after nickname change
     } catch (error) {
       console.error("Error updating nickname", error);
     }
   };
-
 
   const formatDateTime = (timestamp) => {
     const date = new Date(parseInt(timestamp, 10));
     return date.toLocaleString(); // You can customize the format here
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error fetching user data</div>;
 
   return (
@@ -69,6 +72,7 @@ const UserProfile = () => {
           </form>
 
           <button onClick={handleLogout}>Logout</button>
+          <button onClick={() => navigate('/chat')}>Back to Chat</button>
         </div>
       ) : (
         <div>No user data found</div>

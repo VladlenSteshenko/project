@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import './ChatPage.css';
-import { sendMessage } from '../../thunks/chatThunks';
+import { sendMessage, updateChatMessage } from '../../thunks/chatThunks';
+
 
 const mockMessages = [
   {
@@ -26,6 +27,10 @@ const ChatView = () => {
   const selectedChat = useSelector((state) => state.chat.selectedChat);
   const selectedChatMessages = useSelector((state) => state.chat.selectedChatMessages[selectedChat?._id] || []);
   const [messageText, setMessageText] = useState('');
+  const user = useSelector((state) => state.auth.payload);
+  const userId = user?.sub?.id;
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editText, setEditText] = useState('');
 
   if (!selectedChat) {
     return <div className="chat-view">Select a chat to view messages</div>;
@@ -38,6 +43,16 @@ const ChatView = () => {
     }
   };
 
+  const handleEditMessage = (message) => {
+    setEditingMessageId(message._id);
+    setEditText(message.text);
+  };
+
+  const handleEditSubmit = (e, chatId, messageId) => {
+    e.preventDefault();
+    dispatch(updateChatMessage({ chatId, messageId, newText: editText }));
+    setEditingMessageId(null);
+  };
 
   return (
     <div className="chat-view">
@@ -51,7 +66,24 @@ const ChatView = () => {
               </div>
               <div className="message-content">
                 <span className="message-author">{message.owner?.nick}</span>
-                <p className="message-text">{message.text}</p>
+                {editingMessageId === message._id ? (
+                  <form onSubmit={(e) => handleEditSubmit(e, selectedChat._id, message._id)}>
+                    <input
+                      type="text"
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                    />
+                    <button type="submit">Save</button>
+                    <button type="button" onClick={() => setEditingMessageId(null)}>Cancel</button>
+                  </form>
+                ) : (
+                  <>
+                    <p className="message-text">{message.text}</p>
+                    {message.owner._id === userId && (
+                      <button onClick={() => handleEditMessage(message)}>Edit</button>
+                    )}
+                  </>
+                )}
                 <span className="message-time">{new Date(parseInt(message.createdAt)).toLocaleString()}</span>
               </div>
             </li>
@@ -73,7 +105,6 @@ const ChatView = () => {
   );
 };
 
-
-
 export default ChatView;
+
 

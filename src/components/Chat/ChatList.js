@@ -42,10 +42,12 @@ const ChatList = () => {
     dispatch(fetchChatMessages({ chatID: chat._id, offset: 0 }));
   };
 
+  const handleGoToProfile = () => {
+    navigate('/profile');
+  };
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading chats</div>;
-
 
   return (
     <div className="chat-list">
@@ -57,6 +59,7 @@ const ChatList = () => {
           placeholder="New chat title"
         />
         <button onClick={handleCreateChat}>Create New Chat</button>
+        <button onClick={handleGoToProfile}>My Profile</button>
       </div>
       <ul>
         {chats.map((chat) => (
@@ -75,6 +78,7 @@ const ChatList = () => {
     </div>
   );
 };
+
 
 export default ChatList;
 

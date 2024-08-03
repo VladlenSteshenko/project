@@ -66,8 +66,8 @@ export const api = createApi({
 
     userFindOne: builder.query({
       query: ({ _id }) => ({
-        document: `query oneUser($query: String){
-              UserFindOne(query: $query){
+        document: `query oneUser{
+             UserFindOne(query: "[{\\"_id\\":\\"${_id}\\"}]"){
                 _id
                 login
                 nick
@@ -78,7 +78,7 @@ export const api = createApi({
 
               }
           }`,
-        variables: { query: JSON.stringify([{ _id }]) },
+        variables: { _id },
       }),
       providesTags: (result, error, { _id }) => {
         return [{ type: "User", id: _id }];
@@ -106,7 +106,7 @@ export const api = createApi({
     setUserNick: builder.mutation({
       query: ({ _id, nick }) => ({
         document: `
-          mutation setNick($_id: String, $nick: String) {
+          mutation setNick($_id: ID, $nick: String) {
             UserUpsert(user: { _id: $_id, nick: $nick }) {
               _id
               nick
@@ -264,6 +264,32 @@ export const api = createApi({
         variables: { chatID, text },
       }),
     }),
+
+    MessageUpdate: builder.mutation({
+      query: ({ messageid, text }) => ({
+        document: `
+          mutation MessageUpdate($text: String, $messageid: ID) {
+            MessageUpsert(message: { text: $text, _id: $messageid }) {
+              _id
+              createdAt
+              text
+              owner {
+                _id
+                nick
+                avatar {
+                  url
+                }
+              }
+              chat {
+                _id
+              }
+            }
+          }
+        `,
+        variables: { messageid, text },
+      }),
+    }),
+    
   }),
 });
 
@@ -278,5 +304,6 @@ export const {
   useChatUpsertMutation,
   useActionAboutMeQuery,
   useGetMessagesQuery,
-  useMessageUpsertMutation
+  useMessageUpsertMutation,
+  useMessageUpdateMutation
 } = api;
