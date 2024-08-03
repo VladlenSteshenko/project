@@ -24,15 +24,13 @@ const mockMessages = [
 const ChatView = () => {
   const dispatch = useDispatch();
   const selectedChat = useSelector((state) => state.chat.selectedChat);
-  const selectedChatMessages = useSelector((state) => state.chat.selectedChatMessages[selectedChat?._id] || {});
+  const selectedChatMessages = useSelector((state) => state.chat.selectedChatMessages[selectedChat?._id] || []);
   const [messageText, setMessageText] = useState('');
 
   if (!selectedChat) {
     return <div className="chat-view">Select a chat to view messages</div>;
   }
 
-  const messagesArray = Object.values(selectedChatMessages).sort((a, b) => parseInt(b.createdAt) - parseInt(a.createdAt));
-  
   const handleSendMessage = () => {
     if (messageText.trim()) {
       dispatch(sendMessage({ chatID: selectedChat._id, text: messageText }));
@@ -40,12 +38,13 @@ const ChatView = () => {
     }
   };
 
+
   return (
     <div className="chat-view">
       <h3>{selectedChat.title || 'Untitled Chat'}</h3>
       <ul>
-        {messagesArray.length > 0 ? (
-          messagesArray.map((message) => (
+        {selectedChatMessages.length > 0 ? (
+          selectedChatMessages.map((message) => (
             <li key={message._id} className="message-item">
               <div className="message-avatar">
                 <img src={message.owner?.avatar?.url || 'default-avatar.png'} alt="avatar" />
@@ -73,6 +72,7 @@ const ChatView = () => {
     </div>
   );
 };
+
 
 
 export default ChatView;

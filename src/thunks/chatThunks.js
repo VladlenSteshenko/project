@@ -22,21 +22,14 @@ export const connectSocket = createAsyncThunk(
       return;
     }
 
-    // Connect to socket and authenticate
-    
     socket.emit('jwt', token);
 
-    // Receive updates for chats of user
     socket.on('chat', (chat) => {
       dispatch(addChat(chat));
-
     });
 
     socket.on('msg', ({ chatId, messages }) => {
-      console.log(messages)
-      if (state.chat.chatList[chatId]) {
-        dispatch(setSelectedChatMessages({ chatId, messages }));
-      }
+      dispatch(setSelectedChatMessages({ chatID: chatId, messages }));
     });
   }
 );
@@ -45,30 +38,27 @@ export const fetchChatMessages = createAsyncThunk(
   'chat/fetchChatMessages',
   async ({ chatID, offset }, { dispatch }) => {
     try {
-      const response = await dispatch(api.endpoints.getMessages.initiate({ chatID, offset }));
-      const data = await response.data;
-      dispatch(setSelectedChatMessages({ chatID, messages: data.MessageFind }));
+      const response = await dispatch(api.endpoints.getMessages.initiate({ chatID, offset })).unwrap();
+      dispatch(setSelectedChatMessages({ chatID, messages: response.MessageFind }));
     } catch (error) {
       console.error('Error fetching chat messages:', error);
-      throw error; // Re-throw the error to be handled by the calling code
+      throw error;
     }
   }
 );
-
 
 export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
   async ({ chatID, text }, { dispatch }) => {
     try {
       const response = await dispatch(api.endpoints.MessageUpsert.initiate({ chatID, text })).unwrap();
-      // Unwrap the data object manually
-      const message = response.MessageUpsert;
-      dispatch(addMessage({ chatID, message }));
+      dispatch(addMessage({ chatID, message: response.MessageUpsert }));
     } catch (error) {
       console.error('Error sending message:', error);
     }
   }
 );
+
 
 
 

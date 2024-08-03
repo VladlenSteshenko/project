@@ -16,7 +16,8 @@ const mockChats = [
 const ChatList = () => {
   const user = useSelector((state) => state.auth.payload);
   const userId = user?.sub?.id;
-  const chats = useSelector((state) => Object.values(state.chat.chatList)) || mockChats;
+  const chatList = useSelector((state) => state.chat.chatList) || {};
+  const chats = Object.values(chatList) || mockChats;
   const [createChat] = useChatUpsertMutation();
   const [newChatTitle, setNewChatTitle] = useState('');
   const dispatch = useDispatch();

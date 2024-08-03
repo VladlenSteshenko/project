@@ -9,52 +9,54 @@ const chatSlice = createSlice({
     selectedChatMessages: {},
   },
   reducers: {
-    setChatList(state, action) {
-      state.chatList = action.payload;
+    setChatList: (state, action) => {
+      const chatList = action.payload.reduce((acc, chat) => {
+        acc[chat._id] = chat;
+        return acc;
+      }, {});
+      state.chatList = chatList;
     },
-    setSelectedChat(state, action) {
-      state.selectedChat = action.payload;
-    },
-    addChat(state, action) {
+    addChat: (state, action) => {
       const chat = action.payload;
       state.chatList[chat._id] = chat;
     },
-    updateLastMessage(state, action) {
+    updateLastMessage: (state, action) => {
       const { chatId, lastMessage } = action.payload;
       if (state.chatList[chatId]) {
         state.chatList[chatId].lastMessage = lastMessage;
       }
     },
+    setSelectedChat: (state, action) => {
+      state.selectedChat = action.payload;
+    },
     setSelectedChatMessages: (state, action) => {
       const { chatID, messages } = action.payload;
-      const messageObject = messages.reduce((acc, message) => {
-        acc[message._id] = message;
-        return acc;
-      }, {});
-      state.selectedChatMessages[chatID] = messageObject;
+      state.selectedChatMessages[chatID] = messages;
     },
     addMessage: (state, action) => {
       const { chatID, message } = action.payload;
       if (state.selectedChatMessages[chatID]) {
-        state.selectedChatMessages[chatID][message._id] = message;
+        state.selectedChatMessages[chatID].push(message);
+      } else {
+        state.selectedChatMessages[chatID] = [message];
       }
       if (state.chatList[chatID]) {
         state.chatList[chatID].lastMessage = message;
       }
     },
-
   },
 });
 
 export const {
   setChatList,
-  setSelectedChat,
   addChat,
   updateLastMessage,
+  setSelectedChat,
   setSelectedChatMessages,
   addMessage,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
+
 
 
