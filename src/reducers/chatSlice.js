@@ -1,5 +1,5 @@
 // src/reducers/chatSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 const chatSlice = createSlice({
   name: 'chat',
@@ -62,28 +62,22 @@ const chatSlice = createSlice({
       }
     },
     updateMessage: (state, action) => {
-      const { chatId, message } = action.payload;
-
-      // Update in selectedChatMessages
+      const { chatId, messageId, newText } = action.payload;
+      const chat = state.chatList[chatId];
+      if (chat && chat.messages) {
+        const messageIndex = chat.messages.findIndex(msg => msg._id === messageId);
+        if (messageIndex !== -1) {
+          chat.messages[messageIndex].text = newText;
+        }
+      }
       const messages = state.selectedChatMessages[chatId];
       if (messages) {
-        const index = messages.findIndex(msg => msg._id === message._id);
-        if (index !== -1) {
-          messages[index] = message;
+        const messageIndex = messages.findIndex(msg => msg._id === messageId);
+        if (messageIndex !== -1) {
+          messages[messageIndex].text = newText;
         }
       }
-
-      // Update in chatList
-      if (state.chatList[chatId]) {
-        const chatMessages = state.chatList[chatId].messages || [];
-        const index = chatMessages.findIndex(msg => msg._id === message._id);
-        if (index !== -1) {
-          chatMessages[index] = message;
-        }
-      }
-
     }
-
   },
 });
 
@@ -99,6 +93,7 @@ export const {
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
+
 
 
 

@@ -30,6 +30,7 @@ export const connectSocket = createAsyncThunk(
     });
 
     socket.on('msg', ({ chatId, messages }) => {
+      console.log(messages)
       dispatch(setSelectedChatMessages({ chatID: chatId, messages }));
     });
   }
@@ -65,12 +66,14 @@ export const updateChatMessage = createAsyncThunk(
   async ({ chatId, messageId, newText }, { dispatch }) => {
     try {
       const response = await dispatch(api.endpoints.MessageUpdate.initiate({ text: newText, messageid: messageId })).unwrap();
-      dispatch(updateMessage({ chatId, message: response.MessageUpsert }));
+      const updatedMessage = response.MessageUpsert;
+      dispatch(updateMessage({ chatId, messageId, newText: updatedMessage.text }));
     } catch (error) {
       console.error('Error updating message:', error);
     }
   }
 );
+
 
 
 
