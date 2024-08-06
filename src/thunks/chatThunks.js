@@ -4,14 +4,14 @@ import {
   setChatList,
   addChat,
   updateLastMessage,
-  setSelectedChatMessages,
+  setChatMessages,
   addMessage,
   updateMessage
 } from '../reducers/chatSlice';
 import io from 'socket.io-client';
 import { api } from '../api/api';
 
-const socket = io("ws://chat.ed.asmer.org.ua")
+const socket = io("ws://chat.ed.asmer.org.ua");
 
 export const connectSocket = createAsyncThunk(
   'auth/connectSocket',
@@ -30,17 +30,17 @@ export const connectSocket = createAsyncThunk(
     });
 
     socket.on('msg', ({ chatId, messages }) => {
-      dispatch(setSelectedChatMessages({ chatID: chatId, messages }));
+      dispatch(setChatMessages({ chatId, messages }));
     });
   }
 );
 
 export const fetchChatMessages = createAsyncThunk(
   'chat/fetchChatMessages',
-  async ({ chatID, offset }, { dispatch }) => {
+  async ({ chatId, offset }, { dispatch }) => {
     try {
-      const response = await dispatch(api.endpoints.getMessages.initiate({ chatID, offset })).unwrap();
-      dispatch(setSelectedChatMessages({ chatID, messages: response.MessageFind }));
+      const response = await dispatch(api.endpoints.getMessages.initiate({ chatID:chatId, offset })).unwrap();
+      dispatch(setChatMessages({ chatId, messages: response.MessageFind }));
     } catch (error) {
       console.error('Error fetching chat messages:', error);
       throw error;
@@ -50,10 +50,10 @@ export const fetchChatMessages = createAsyncThunk(
 
 export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
-  async ({ chatID, text }, { dispatch }) => {
+  async ({ chatId, text }, { dispatch }) => {
     try {
-      const response = await dispatch(api.endpoints.MessageUpsert.initiate({ chatID, text })).unwrap();
-      dispatch(addMessage({ chatID, message: response.MessageUpsert }));
+      const response = await dispatch(api.endpoints.MessageUpsert.initiate({ chatID:chatId, text })).unwrap();
+      dispatch(addMessage({ chatId, message: response.MessageUpsert }));
     } catch (error) {
       console.error('Error sending message:', error);
     }
@@ -71,8 +71,3 @@ export const updateChatMessage = createAsyncThunk(
     }
   }
 );
-
-
-
-
-

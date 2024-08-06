@@ -1,21 +1,48 @@
 // src/reducers/chatSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { current } from 'immer';
+
 
 const chatSlice = createSlice({
   name: 'chat',
   initialState: {
     chatList: {},
-    selectedChat: null,
-    selectedChatMessages: {},
+    selectedChatId: null,
   },
   reducers: {
     setChatList: (state, action) => {
-      const chatList = action.payload.reduce((acc, chat) => {
+      const payload = action.payload;
+      let chats = [];
+
+      // Check if payload is an array
+      if (Array.isArray(payload)) {
+        chats = payload;
+      } else if (typeof payload === 'object' && payload !== null) {
+        // Search for chats array within the payload
+        const findChats = (obj) => {
+          for (let key in obj) {
+            if (Array.isArray(obj[key])) {
+              return obj[key];
+            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+              const result = findChats(obj[key]);
+              if (result) return result;
+            }
+          }
+          return null;
+        };
+
+        chats = findChats(payload) || [];
+      }
+
+      // Convert chats array to an object
+      const chatList = chats.reduce((acc, chat) => {
         acc[chat._id] = chat;
         return acc;
       }, {});
+
       state.chatList = chatList;
     },
+
     addChat: (state, action) => {
       const chat = action.payload;
       state.chatList[chat._id] = chat;
@@ -26,35 +53,30 @@ const chatSlice = createSlice({
         state.chatList[chatId].lastMessage = lastMessage;
       }
     },
-    setSelectedChat: (state, action) => {
-      state.selectedChat = action.payload;
+    setSelectedChatId: (state, action) => {
+      state.selectedChatId = action.payload;
     },
-    setSelectedChatMessages: (state, action) => {
-      const { chatID, messages } = action.payload;
-      state.selectedChatMessages[chatID] = messages;
+    setChatMessages: (state, action) => {
+      const { chatId, messages } = action.payload;
+      if (state.chatList[chatId]) {
+        state.chatList[chatId].messages = messages;
+      }
     },
     addMessage: (state, action) => {
-      const { chatID, message } = action.payload;
-      if (state.selectedChatMessages[chatID]) {
-        state.selectedChatMessages[chatID].push(message);
-      } else {
-        state.selectedChatMessages[chatID] = [message];
-      }
-      if (state.chatList[chatID]) {
-        state.chatList[chatID].lastMessage = message;
+      const { chatId, message } = action.payload;
+      if (state.chatList[chatId]) {
+        state.chatList[chatId].messages.push(message);
+        state.chatList[chatId].lastMessage = message;
       }
     },
     updateUserNickname: (state, action) => {
       const { userId, newNick } = action.payload;
       for (let chatId in state.chatList) {
         const chat = state.chatList[chatId];
-        chat.members = chat.members.map(member => 
+        chat.members = chat.members.map(member =>
           member._id === userId ? { ...member, nick: newNick } : member
         );
-      }
-      for (let chatId in state.selectedChatMessages) {
-        const messages = state.selectedChatMessages[chatId];
-        messages.forEach(message => {
+        chat.messages.forEach(message => {
           if (message.owner._id === userId) {
             message.owner.nick = newNick;
           }
@@ -63,27 +85,12 @@ const chatSlice = createSlice({
     },
     updateMessage: (state, action) => {
       const { chatId, message } = action.payload;
-
-      // Update in selectedChatMessages
-      const messages = state.selectedChatMessages[chatId];
-      if (messages) {
-        const index = messages.findIndex(msg => msg._id === message._id);
-        if (index !== -1) {
-          messages[index] = message;
-        }
+      const messages = state.chatList[chatId].messages;
+      const index = messages.findIndex(msg => msg._id === message._id);
+      if (index !== -1) {
+        messages[index] = message;
       }
-
-      // Update in chatList
-      if (state.chatList[chatId]) {
-        const chatMessages = state.chatList[chatId].messages || [];
-        const index = chatMessages.findIndex(msg => msg._id === message._id);
-        if (index !== -1) {
-          chatMessages[index] = message;
-        }
-      }
-
     }
-
   },
 });
 
@@ -91,14 +98,15 @@ export const {
   setChatList,
   addChat,
   updateLastMessage,
-  setSelectedChat,
-  setSelectedChatMessages,
+  setSelectedChatId,
+  setChatMessages,
   addMessage,
   updateUserNickname,
   updateMessage
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
+
 
 
 

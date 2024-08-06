@@ -1,44 +1,35 @@
 // src/components/Chat/ChatView.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import './ChatPage.css';
-import { sendMessage, updateChatMessage } from '../../thunks/chatThunks';
-
-
-const mockMessages = [
-  {
-    id: 1,
-    text: "Hello",
-    author: "User 1",
-    avatar: "https://via.placeholder.com/30",
-    time: "10:00 AM",
-  },
-  {
-    id: 2,
-    text: "Hi",
-    author: "User 2",
-    avatar: "https://via.placeholder.com/30",
-    time: "10:05 AM",
-  },
-];
+import { sendMessage, updateChatMessage, fetchChatMessages } from '../../thunks/chatThunks';
 
 const ChatView = () => {
   const dispatch = useDispatch();
-  const selectedChat = useSelector((state) => state.chat.selectedChat);
-  const selectedChatMessages = useSelector((state) => state.chat.selectedChatMessages[selectedChat?._id] || []);
+  let selectedChatId = useSelector((state) => state.chat.selectedChatId);
+  let selectedChat = useSelector((state) => state.chat.chatList[selectedChatId]);
   const [messageText, setMessageText] = useState('');
   const user = useSelector((state) => state.auth.payload);
   const userId = user?.sub?.id;
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editText, setEditText] = useState('');
 
+  useEffect(() => {
+    if (selectedChatId) {
+      dispatch(fetchChatMessages({ chatId: selectedChatId, offset: 0 }));
+    }
+  }, [selectedChatId, dispatch]);
+
+
   if (!selectedChat) {
     return <div className="chat-view">Select a chat to view messages</div>;
   }
 
+  let selectedChatMessages = selectedChat.messages || [];
+
   const handleSendMessage = () => {
     if (messageText.trim()) {
-      dispatch(sendMessage({ chatID: selectedChat._id, text: messageText }));
+      dispatch(sendMessage({ chatId: selectedChatId, text: messageText }));
       setMessageText('');
     }
   };
@@ -67,7 +58,7 @@ const ChatView = () => {
               <div className="message-content">
                 <span className="message-author">{message.owner?.nick}</span>
                 {editingMessageId === message._id ? (
-                  <form onSubmit={(e) => handleEditSubmit(e, selectedChat._id, message._id)}>
+                  <form onSubmit={(e) => handleEditSubmit(e, selectedChatId, message._id)}>
                     <input
                       type="text"
                       value={editText}
@@ -106,5 +97,4 @@ const ChatView = () => {
 };
 
 export default ChatView;
-
 

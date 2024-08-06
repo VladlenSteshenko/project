@@ -2,18 +2,11 @@
 import React from "react";
 import "./ChatPage.css";
 import { useSelector } from "react-redux";
-const mockChatInfo = {
-  name: "Chat 1",
-  createdAt: "2024-07-10",
-  description: "This is a sample chat",
-  users: [
-    { id: 1, name: "User 1", avatar: "https://via.placeholder.com/30" },
-    { id: 2, name: "User 2", avatar: "https://via.placeholder.com/30" },
-  ],
-};
 
 const ChatInfo = () => {
-  const selectedChat = useSelector((state) => state.chat.selectedChat);
+  const selectedChatId = useSelector((state) => state.chat.selectedChatId);
+  const chatList = useSelector((state) => state.chat.chatList);
+  const selectedChat = chatList[selectedChatId];
   const thisuser = useSelector((state) => state.auth.payload);
   const thisuserId = thisuser?.sub?.id;
 
@@ -60,8 +53,8 @@ const ChatInfo = () => {
             />
             <span>{user.nick}</span>
             {user._id !== thisuserId && (
-                <button onClick={() => handleRemoveUser(user._id)}>Remove User</button>
-              )}
+              <button onClick={() => handleRemoveUser(user._id)}>Remove User</button>
+            )}
           </div>
         ))}
       </div>
@@ -70,3 +63,4 @@ const ChatInfo = () => {
 };
 
 export default ChatInfo;
+
