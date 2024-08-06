@@ -1,6 +1,7 @@
-// src/api/api.js http://chat.ed.asmer.org.ua/graphql
+// src/api/api.js
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { graphqlRequestBaseQuery } from "@rtk-query/graphql-request-base-query";
+
 // Create a wrapper around graphqlRequestBaseQuery that logs the query
 const logQueryBaseQuery = (baseQuery) => async (args, api, extraOptions) => {
   // Log the query
@@ -9,6 +10,7 @@ const logQueryBaseQuery = (baseQuery) => async (args, api, extraOptions) => {
   // Send the query to the API
   return await baseQuery(args, api, extraOptions);
 };
+
 export const api = createApi({
   baseQuery: logQueryBaseQuery(
     graphqlRequestBaseQuery({
@@ -23,6 +25,7 @@ export const api = createApi({
       },
     })
   ),
+  tagTypes: ["User", "Chat", "Message"], // Define tag types for caching
   endpoints: (builder) => ({
     login: builder.mutation({
       query: ({ login, password }) => ({
@@ -62,29 +65,30 @@ export const api = createApi({
           }
         `,
       }),
+      providesTags: (result) =>
+        result
+          ? result.UserFind.map(({ _id }) => ({ type: "User", id: _id }))
+          : [],
     }),
-
     userFindOne: builder.query({
       query: ({ _id }) => ({
-        document: `query oneUser{
-             UserFindOne(query: "[{\\"_id\\":\\"${_id}\\"}]"){
-                _id
-                login
-                nick
-                createdAt
-                avatar {
-                  url
-                }
-
+        document: `
+          query oneUser {
+            UserFindOne(query: "[{\\"_id\\":\\"${_id}\\"}]") {
+              _id
+              login
+              nick
+              createdAt
+              avatar {
+                url
               }
-          }`,
+            }
+          }
+        `,
         variables: { _id },
       }),
-      providesTags: (result, error, { _id }) => {
-        return [{ type: "User", id: _id }];
-      },
+      providesTags: (result, error, { _id }) => [{ type: "User", id: _id }],
     }),
-
     userUpsert: builder.mutation({
       query: (user) => ({
         document: `
@@ -101,8 +105,8 @@ export const api = createApi({
         `,
         variables: { user },
       }),
+      invalidatesTags: (result, error, { _id }) => [{ type: "User", id: _id }],
     }),
-
     setUserNick: builder.mutation({
       query: ({ _id, nick }) => ({
         document: `
@@ -117,60 +121,64 @@ export const api = createApi({
       }),
       invalidatesTags: (result, error, { _id }) => [{ type: "User", id: _id }],
     }),
-
     userChats: builder.query({
       query: ({ _id }) => ({
         document: `
           query userChats($query: String) {
-              UserFindOne(query: $query) {
+            UserFindOne(query: $query) {
+              _id
+              login
+              nick
+              createdAt
+              avatar {
+                url
+              }
+              chats {
                 _id
-                login
-                nick
-                createdAt
+                title
+                lastModified
+                members {
+                  _id
+                  nick
+                }
                 avatar {
                   url
                 }
-                chats {
-                  _id
-                  title
-                  lastModified
-                  members {
-                    _id
-                    nick
-                  }
-                  avatar {
-                    url
-                  }
-                }
               }
             }
+          }
         `,
         variables: { query: JSON.stringify([{ _id }]) },
       }),
-      providesTags: (result, error, { _id }) => {
-        return [{ type: "User", id: _id }];
-      },
+      providesTags: (result, error, { _id }) =>
+        result
+          ? [
+              { type: "User", id: _id },
+              ...result.UserFindOne.chats.map((chat) => ({
+                type: "Chat",
+                id: chat._id,
+              })),
+            ]
+          : [],
     }),
-
     chatUpsert: builder.mutation({
       query: ({ title }) => ({
         document: `
-          mutation createChat($title: String) {
-            ChatUpsert(chat: { title: $title }) {
-              _id
-              title
-            }
+        mutation createChat($title: String) {
+          ChatUpsert(chat: { title: $title }) {
+            _id
+            title
           }
-            
-        `,
+        }
+      `,
         variables: { title },
       }),
       invalidatesTags: ["Chat"],
     }),
-
     actionAboutMe: builder.query({
       query: ({ _id }) => ({
-        document: `query actionAboutMe($query: String) {
+        document: `
+        query actionAboutMe($query: String) {
           UserFindOne(query: $query) {
             _id
             login
@@ -192,104 +200,116 @@ export const api = createApi({
               }
             }
           }
-        }`,
+        }
+      `,
         variables: { query: JSON.stringify([{ _id }]) },
       }),
+      providesTags: (result, error, { _id }) => [{ type: "User", id: _id }],
     }),
-
     getMessages: builder.query({
       query: ({ chatID, offset }) => ({
         document: `
-            query getMessages {
-              MessageFind(
-                query: "[{\\"chat._id\\": \\"${chatID}\\"}, {\\"sort\\": [{\\"_id\\": -1}]}, {\\"limit\\": 100}, {\\"offset\\": ${offset}}]"
-              ) {
-                _id
-                createdAt
-                owner {
-                  _id
-                  nick
-                  avatar {
-                    url
-                  }
-                }
-                text
-                chat {
-                  _id
-                }
-                media {
-                  _id
-                  url
-                }
-                replies {
-                  _id
-                }
-                replyTo {
-                  _id
-                }
-                forwarded {
-                  _id
-                }
+        query getMessages {
+          MessageFind(
+            query: "[{\\"chat._id\\": \\"${chatID}\\"}, {\\"sort\\": [{\\"_id\\": -1}]}, {\\"limit\\": 100}, {\\"offset\\": ${offset}}]"
+          ) {
+            _id
+            createdAt
+            owner {
+              _id
+              nick
+              avatar {
+                url
               }
             }
-          `,
+            text
+            chat {
+              _id
+            }
+            media {
+              _id
+              url
+            }
+            replies {
+              _id
+            }
+            replyTo {
+              _id
+            }
+            forwarded {
+              _id
+            }
+          }
+        }
+      `,
         variables: {
           chatID,
           offset,
         },
       }),
+      providesTags: (result, error, { chatID }) =>
+        result
+          ? result.MessageFind.map(({ _id }) => ({
+              type: "Message",
+              id: _id,
+              chatID,
+            }))
+          : [],
     }),
-
     MessageUpsert: builder.mutation({
       query: ({ chatID, text }) => ({
         document: `
-          mutation MessageUpsert($chatID: ID, $text: String) {
-            MessageUpsert(message: { chat: { _id: $chatID }, text: $text }) {
+        mutation MessageUpsert($chatID: ID, $text: String) {
+          MessageUpsert(message: { chat: { _id: $chatID }, text: $text }) {
+            _id
+            createdAt
+            text
+            owner {
               _id
-              createdAt
-              text
-              owner {
-                _id
-                nick
-                avatar {
-                  url
-                }
-              }
-              chat {
-                _id
+              nick
+              avatar {
+                url
               }
             }
+            chat {
+              _id
+            }
           }
-        `,
+        }
+      `,
         variables: { chatID, text },
       }),
+      invalidatesTags: (result, error, { chatID }) => [
+        { type: "Message", chatID },
+      ],
     }),
-
     MessageUpdate: builder.mutation({
       query: ({ messageid, text }) => ({
         document: `
-          mutation MessageUpdate($text: String, $messageid: ID) {
-            MessageUpsert(message: { text: $text, _id: $messageid }) {
+        mutation MessageUpdate($text: String, $messageid: ID) {
+          MessageUpsert(message: { text: $text, _id: $messageid }) {
+            _id
+            createdAt
+            text
+            owner {
               _id
-              createdAt
-              text
-              owner {
-                _id
-                nick
-                avatar {
-                  url
-                }
-              }
-              chat {
-                _id
+              nick
+              avatar {
+                url
               }
             }
+            chat {
+              _id
+            }
           }
-        `,
+        }
+      `,
         variables: { messageid, text },
       }),
+      invalidatesTags: (result, error, { messageid }) => [
+        { type: "Message", id: messageid },
+      ],
     }),
-    
   }),
 });
 
@@ -305,5 +325,5 @@ export const {
   useActionAboutMeQuery,
   useGetMessagesQuery,
   useMessageUpsertMutation,
-  useMessageUpdateMutation
+  useMessageUpdateMutation,
 } = api;
