@@ -1,7 +1,8 @@
 // src/components/Chat/ChatInfo.js
 import React from "react";
-import "./ChatPage.css";
 import { useSelector } from "react-redux";
+import { Avatar, Box, Button, Container, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@mui/material';
+import './ChatPage.css';
 
 const ChatInfo = () => {
   const selectedChatId = useSelector((state) => state.chat.selectedChatId);
@@ -11,7 +12,7 @@ const ChatInfo = () => {
   const thisuserId = thisuser?.sub?.id;
 
   if (!selectedChat) {
-    return <div className="chat-info">Select a chat to see details</div>;
+    return <Typography>Select a chat to see details</Typography>;
   }
 
   const handleDeleteChat = () => {
@@ -27,38 +28,29 @@ const ChatInfo = () => {
   };
 
   return (
-    <div className="chat-info">
-      <h3>{selectedChat.title || "Untitled Chat"}</h3>
-      <button onClick={handleDeleteChat}>Delete Chat</button>
-      <button onClick={handleAddUser}>Add User</button>
-      <p>
-        Last Modified:{" "}
-        {selectedChat.lastModified
-          ? new Date(parseInt(selectedChat.lastModified)).toLocaleString()
-          : ""}
-      </p>
-      <div className="chat-avatar">
-        <img
-          src={selectedChat.avatar?.url || "default-avatar.png"}
-          alt="avatar"
-        />
-      </div>
-      <h4>Members</h4>
-      <div className="users">
+    <Container>
+      <Avatar src={selectedChat.avatar?.url || "default-avatar.png"} alt="avatar" sx={{ width: 56, height: 56, mb: 2 }} />
+      <Typography variant="h5" gutterBottom>{selectedChat.title || "Untitled Chat"}</Typography>
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <Button variant="contained" color="secondary" onClick={handleDeleteChat}>Delete Chat</Button>
+        <Button variant="contained" onClick={handleAddUser}>Add User</Button>
+      </Box>
+      <Typography>Last Modified: {selectedChat.lastModified ? new Date(parseInt(selectedChat.lastModified)).toLocaleString() : ""}</Typography>
+      <Typography variant="h6" gutterBottom>Members</Typography>
+      <List>
         {selectedChat.members.map((user) => (
-          <div key={user._id} className="user-item">
-            <img
-              src={user.avatar?.url || "https://via.placeholder.com/30"}
-              alt={user.nick}
-            />
-            <span>{user.nick}</span>
+          <ListItem key={user._id}>
+            <ListItemAvatar>
+              <Avatar src={user.avatar?.url || "https://via.placeholder.com/30"} alt={user.nick} />
+            </ListItemAvatar>
+            <ListItemText primary={user.nick} />
             {user._id !== thisuserId && (
-              <button onClick={() => handleRemoveUser(user._id)}>Remove User</button>
+              <Button onClick={() => handleRemoveUser(user._id)}>Remove User</Button>
             )}
-          </div>
+          </ListItem>
         ))}
-      </div>
-    </div>
+      </List>
+    </Container>
   );
 };
 

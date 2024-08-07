@@ -5,6 +5,7 @@ import { setProfile, logout } from '../../reducers/authSlice';
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { updateUserNickname } from '../../reducers/chatSlice';
+import { Button, Container, Typography, TextField, CircularProgress, Avatar, Box, Paper } from '@mui/material';
 
 const UserProfile = () => {
   const dispatch = useDispatch();
@@ -17,6 +18,7 @@ const UserProfile = () => {
   const [setUserNick] = useSetUserNickMutation();
 
   const [nick, setNick] = useState("");
+
   useEffect(() => {
     if (data && data.UserFindOne) {
       dispatch(setProfile(data.UserFindOne));
@@ -45,48 +47,51 @@ const UserProfile = () => {
     return date.toLocaleString(); // You can customize the format here
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error fetching user data</div>;
+  if (isLoading) return <CircularProgress />;
+  if (error) return <Typography color="error">Error fetching user data</Typography>;
 
   return (
-    <div>
-      <h1>User Profile</h1>
-      {profile ? (
-        <div>
-          <p>Login: {profile.login}</p>
-          <p>Nick: {profile.nick}</p>
-          <p>Created At: {formatDateTime(profile.createdAt)}</p>
-          {profile.avatar && (
-            <div>
-              <img src={profile.avatar.url} alt="avatar" />
-            </div>
-          )}
-          <form onSubmit={handleNickChange}>
-            <label>Change Nickname</label>
-            <input
-              type="text"
-              value={nick}
-              onChange={(e) => setNick(e.target.value)}
-            />
-            <button type="submit">Update Nickname</button>
-          </form>
-
-          <button onClick={handleLogout}>Logout</button>
-          <button onClick={() => navigate('/chat')}>Back to Chat</button>
-        </div>
-      ) : (
-        <div>No user data found</div>
-      )}
-    </div>
+    <Container maxWidth="sm">
+      <Paper elevation={3} style={{ padding: '2rem', marginTop: '2rem' }}>
+        <Typography variant="h4" gutterBottom>
+          User Profile
+        </Typography>
+        {profile ? (
+          <Box>
+            <Typography variant="h6">Login: {profile.login}</Typography>
+            <Typography variant="h6">Nick: {profile.nick}</Typography>
+            <Typography variant="h6">Created At: {formatDateTime(profile.createdAt)}</Typography>
+            {profile.avatar && (
+              <Avatar alt="avatar" src={profile.avatar.url} style={{ width: 100, height: 100, margin: '1rem auto' }} />
+            )}
+            <form onSubmit={handleNickChange} style={{ marginTop: '1rem' }}>
+              <TextField
+                label="Change Nickname"
+                variant="outlined"
+                fullWidth
+                value={nick}
+                onChange={(e) => setNick(e.target.value)}
+                style={{ marginBottom: '1rem' }}
+              />
+              <Button variant="contained" color="primary" type="submit" fullWidth>
+                Update Nickname
+              </Button>
+            </form>
+            <Box display="flex" justifyContent="space-between" marginTop="1rem">
+              <Button variant="contained" color="secondary" onClick={handleLogout}>
+                Logout
+              </Button>
+              <Button variant="contained" onClick={() => navigate('/chat')}>
+                Back to Chat
+              </Button>
+            </Box>
+          </Box>
+        ) : (
+          <Typography>No user data found</Typography>
+        )}
+      </Paper>
+    </Container>
   );
 };
 
 export default UserProfile;
-
-
-  
-  
-
-
-
-

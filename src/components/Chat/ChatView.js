@@ -1,8 +1,11 @@
 // src/components/Chat/ChatView.js
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import './ChatPage.css';
 import { sendMessage, updateChatMessage, fetchChatMessages } from '../../thunks/chatThunks';
+import { Avatar, Box, Button, Container, IconButton, List, ListItem, ListItemAvatar, ListItemText, TextField, Typography } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import SendIcon from '@mui/icons-material/Send';
+import './ChatPage.css';
 
 const ChatView = () => {
   const dispatch = useDispatch();
@@ -20,9 +23,8 @@ const ChatView = () => {
     }
   }, [selectedChatId, dispatch]);
 
-
   if (!selectedChat) {
-    return <div className="chat-view">Select a chat to view messages</div>;
+    return <Typography>Select a chat to view messages</Typography>;
   }
 
   let selectedChatMessages = selectedChat.messages || [];
@@ -46,55 +48,62 @@ const ChatView = () => {
   };
 
   return (
-    <div className="chat-view">
-      <h3>{selectedChat.title || 'Untitled Chat'}</h3>
-      <ul>
+    <Container>
+      <Typography variant="h5" gutterBottom>{selectedChat.title || 'Untitled Chat'}</Typography>
+      <List>
         {selectedChatMessages.length > 0 ? (
           selectedChatMessages.map((message) => (
-            <li key={message._id} className="message-item">
-              <div className="message-avatar">
-                <img src={message.owner?.avatar?.url || 'default-avatar.png'} alt="avatar" />
-              </div>
-              <div className="message-content">
-                <span className="message-author">{message.owner?.nick}</span>
-                {editingMessageId === message._id ? (
-                  <form onSubmit={(e) => handleEditSubmit(e, selectedChatId, message._id)}>
-                    <input
-                      type="text"
-                      value={editText}
-                      onChange={(e) => setEditText(e.target.value)}
-                    />
-                    <button type="submit">Save</button>
-                    <button type="button" onClick={() => setEditingMessageId(null)}>Cancel</button>
-                  </form>
-                ) : (
+            <ListItem key={message._id} alignItems="flex-start">
+              <ListItemAvatar>
+                <Avatar src={message.owner?.avatar?.url || 'default-avatar.png'} alt="avatar" />
+              </ListItemAvatar>
+              <ListItemText
+                primary={message.owner?.nick}
+                secondary={
                   <>
-                    <p className="message-text">{message.text}</p>
-                    {message.owner._id === userId && (
-                      <button onClick={() => handleEditMessage(message)}>Edit</button>
+                    {editingMessageId === message._id ? (
+                      <form onSubmit={(e) => handleEditSubmit(e, selectedChatId, message._id)}>
+                        <TextField
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          fullWidth
+                        />
+                        <Button type="submit">Save</Button>
+                        <Button onClick={() => setEditingMessageId(null)}>Cancel</Button>
+                      </form>
+                    ) : (
+                      <>
+                        <Typography>{message.text}</Typography>
+                        {message.owner._id === userId && (
+                          <IconButton onClick={() => handleEditMessage(message)}>
+                            <EditIcon />
+                          </IconButton>
+                        )}
+                      </>
                     )}
+                    <Typography variant="body2" color="textSecondary">{new Date(parseInt(message.createdAt)).toLocaleString()}</Typography>
                   </>
-                )}
-                <span className="message-time">{new Date(parseInt(message.createdAt)).toLocaleString()}</span>
-              </div>
-            </li>
+                }
+              />
+            </ListItem>
           ))
         ) : (
-          <li>No messages yet</li>
+          <Typography>No messages yet</Typography>
         )}
-      </ul>
-      <div className="send-message">
-        <input
-          type="text"
+      </List>
+      <Box display="flex" mt={2}>
+        <TextField
           value={messageText}
           onChange={(e) => setMessageText(e.target.value)}
           placeholder="Type your message"
+          fullWidth
         />
-        <button onClick={handleSendMessage}>Send</button>
-      </div>
-    </div>
+        <IconButton color="primary" onClick={handleSendMessage}>
+          <SendIcon />
+        </IconButton>
+      </Box>
+    </Container>
   );
 };
 
 export default ChatView;
-

@@ -10,6 +10,7 @@ import UserProfile from './components/User/UserProfile';
 import Entry from './components/Auth/Entry';
 import ChatPage from './components/Chat/ChatPage';
 
+
 const App = () => (
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>

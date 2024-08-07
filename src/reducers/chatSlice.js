@@ -73,14 +73,18 @@ const chatSlice = createSlice({
       const { userId, newNick } = action.payload;
       for (let chatId in state.chatList) {
         const chat = state.chatList[chatId];
-        chat.members = chat.members.map(member =>
-          member._id === userId ? { ...member, nick: newNick } : member
-        );
-        chat.messages.forEach(message => {
-          if (message.owner._id === userId) {
-            message.owner.nick = newNick;
-          }
-        });
+        if (chat.members) {
+          chat.members = chat.members.map(member =>
+            member._id === userId ? { ...member, nick: newNick } : member
+          );
+        }
+        if (chat.messages) {
+          chat.messages.forEach(message => {
+            if (message.owner._id === userId) {
+              message.owner.nick = newNick;
+            }
+          });
+        }
       }
     },
     updateMessage: (state, action) => {
