@@ -15,11 +15,13 @@ const ChatView = () => {
   const user = useSelector((state) => state.auth.payload);
   const userId = user?.sub?.id;
   const [editingMessageId, setEditingMessageId] = useState(null);
+  const chatList = useSelector((state) => state.chat.chatList) || {};
   const [editText, setEditText] = useState('');
 
   useEffect(() => {
     if (selectedChatId) {
       dispatch(fetchChatMessages({ chatId: selectedChatId, offset: 0 }));
+      console.log(55555555555555555555,chatList)
     }
   }, [selectedChatId, dispatch]);
 
@@ -33,12 +35,14 @@ const ChatView = () => {
     if (messageText.trim()) {
       dispatch(sendMessage({ chatId: selectedChatId, text: messageText }));
       setMessageText('');
+      console.log(11111111111111,chatList)
     }
   };
 
   const handleEditMessage = (message) => {
     setEditingMessageId(message._id);
     setEditText(message.text);
+    console.log(22222222222222,chatList)
   };
 
   const handleEditSubmit = (e, chatId, messageId) => {

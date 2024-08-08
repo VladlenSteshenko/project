@@ -119,7 +119,10 @@ export const api = createApi({
         `,
         variables: { _id, nick },
       }),
-      invalidatesTags: (result, error, { _id }) => [{ type: "User", id: _id }],
+      invalidatesTags: (result, error, { _id }) => [
+        { type: "User", id: _id },
+        { type: "Chat" },
+      ],
     }),
     userChats: builder.query({
       query: ({ _id }) => ({
@@ -249,12 +252,14 @@ export const api = createApi({
       }),
       providesTags: (result, error, { chatID }) =>
         result
-          ? result.MessageFind.map(({ _id }) => ({
-              type: "Message",
-              id: _id,
-              chatID,
-            }))
-          : [],
+          ? [
+              { type: "Chat", id: chatID },
+              ...result.MessageFind.map(({ _id }) => ({
+                type: "Message",
+                id: _id,
+              })),
+            ]
+          : [{ type: "Chat", id: chatID }],
     }),
     MessageUpsert: builder.mutation({
       query: ({ chatID, text }) => ({
@@ -280,6 +285,7 @@ export const api = createApi({
         variables: { chatID, text },
       }),
       invalidatesTags: (result, error, { chatID }) => [
+        { type: "Chat", id: chatID },
         { type: "Message", chatID },
       ],
     }),
@@ -346,7 +352,9 @@ export const api = createApi({
           members,
         },
       }),
-      invalidatesTags: (result, error, { chatId }) => [{ type: 'Chat', id: chatId }],
+      invalidatesTags: (result, error, { chatId }) => [
+        { type: "Chat", id: chatId },
+      ],
     }),
   }),
 });

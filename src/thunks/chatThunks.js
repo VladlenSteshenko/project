@@ -29,9 +29,31 @@ export const connectSocket = createAsyncThunk(
       dispatch(addChat(chat));
     });
 
-    socket.on('msg', ({ chatId, messages }) => {
-      dispatch(setChatMessages({ chatId, messages }));
+    socket.on('msg', (data) => {
+      console.log('Received message data:', data);
+
+      // Check if data is an object and has the expected properties
+      if (typeof data === 'object' && data !== null) {
+        const { _id: messageId, text, chat: { _id: chatId }, owner } = data;
+
+        if (chatId && text && owner) {
+          const message = {
+            _id: messageId,
+            text,
+            owner,
+            createdAt: data.createdAt,
+          };
+
+          dispatch(addMessage({ chatId, message }));
+          
+        } else {
+          console.error('Received message data does not contain expected properties:', data);
+        }
+      } else {
+        console.error('Received message data is not an object:', data);
+      }
     });
+
   }
 );
 
@@ -53,7 +75,7 @@ export const sendMessage = createAsyncThunk(
   async ({ chatId, text }, { dispatch }) => {
     try {
       const response = await dispatch(api.endpoints.MessageUpsert.initiate({ chatID:chatId, text })).unwrap();
-      dispatch(addMessage({ chatId, message: response.MessageUpsert }));
+      //dispatch(addMessage({ chatId, message: response.MessageUpsert }));
     } catch (error) {
       console.error('Error sending message:', error);
     }
@@ -65,7 +87,7 @@ export const updateChatMessage = createAsyncThunk(
   async ({ chatId, messageId, newText }, { dispatch }) => {
     try {
       const response = await dispatch(api.endpoints.MessageUpdate.initiate({ text: newText, messageid: messageId })).unwrap();
-      dispatch(updateMessage({ chatId, message: response.MessageUpsert }));
+      //dispatch(updateMessage({ chatId, message: response.MessageUpsert }));
     } catch (error) {
       console.error('Error updating message:', error);
     }
