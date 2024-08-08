@@ -310,6 +310,44 @@ export const api = createApi({
         { type: "Message", id: messageid },
       ],
     }),
+    findUsersByNick: builder.query({
+      query: (nick) => ({
+        document: `
+          query FindUsersByNick {
+            UserFind(query: "[{\\"nick\\":  \\"${nick}\\"}]") {
+              _id
+              login
+              nick
+              avatar {
+                url
+              }
+            }
+          }
+        `,
+        variables: { nick },
+      }),
+    }),
+    addUserToChat: builder.mutation({
+      query: ({ chatId, members }) => ({
+        document: `
+          mutation UpdateChatMembers($chatId: ID!, $members: [UserInput!]!) {
+            ChatUpsert(chat: { _id: $chatId, members: $members }) {
+              _id
+              title
+              members {
+                _id
+                nick
+              }
+            }
+          }
+        `,
+        variables: {
+          chatId,
+          members,
+        },
+      }),
+      invalidatesTags: (result, error, { chatId }) => [{ type: 'Chat', id: chatId }],
+    }),
   }),
 });
 
@@ -326,4 +364,6 @@ export const {
   useGetMessagesQuery,
   useMessageUpsertMutation,
   useMessageUpdateMutation,
+  useFindUsersByNickQuery,
+  useAddUserToChatMutation,
 } = api;

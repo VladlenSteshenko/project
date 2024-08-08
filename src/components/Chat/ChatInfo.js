@@ -3,6 +3,8 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Avatar, Box, Button, Container, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@mui/material';
 import './ChatPage.css';
+import UserSearch from './UserSearch';
+
 
 const ChatInfo = () => {
   const selectedChatId = useSelector((state) => state.chat.selectedChatId);
@@ -50,6 +52,7 @@ const ChatInfo = () => {
           </ListItem>
         ))}
       </List>
+      <UserSearch chatId={selectedChatId} />
     </Container>
   );
 };
